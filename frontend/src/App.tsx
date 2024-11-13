@@ -8,6 +8,7 @@ import CallBack from './CallBack'
 import Dashboard from './components/Dashboard/Dashboard'
 import { Authorization } from './utils/Authorization'
 import AnalyzePlaylist from './components/AnalyzePlaylist/AnalyzePlaylist'
+import Error from './components/Error'
 function App() {
   return (
     <>
@@ -17,6 +18,7 @@ function App() {
         <Route path = "/callback" element = {<CallBack/>}/>
         <Route path = "/dashboard" element = {<Dashboard/>}/>
         <Route path = "/analyze" element = {<AnalyzePlaylist/>}/>
+        <Route path = "/error" element = {<Error data={{message:""}}/>}/>
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </Authorization>

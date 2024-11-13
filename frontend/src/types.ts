@@ -6,3 +6,9 @@ export interface UserDataProps {
         id: string;
     };
 }
+
+export interface ErrorProps{
+    data:{
+        message?:string;
+    }
+}

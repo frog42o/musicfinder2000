@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/Authorization';
 import axios from 'axios';
 import { fetchArtistGenre, getTopGenres } from './music_analysis/musicAnalysis';
+import Error from '../../components/Error'
 
 const BASE = "https://api.spotify.com/v1/playlists";
 
@@ -23,7 +24,7 @@ const AnalyzePlaylist: React.FC = () => {
 
     if(!accessToken){
         setLoading(false);
-        throw new Error("Access token is missing or has expired!")
+        return (<Error data = {{ message: "Access Token is missing or has expired!"}}/>)
     }
     if (!playlist) {
         return <p>No playlist data available. Please go back and select a playlist.</p>;
