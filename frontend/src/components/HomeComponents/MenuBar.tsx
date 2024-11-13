@@ -4,7 +4,7 @@ function MenuBar(){
     return(
     <>
       <button
-        className="btn bg-secondary w-100 text-white" 
+        className="btn btn-secondary uppercase-text w-100 text-white mt-1" 
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasMenu"

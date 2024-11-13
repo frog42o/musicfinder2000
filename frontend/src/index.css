@@ -36,10 +36,11 @@ button {
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
-  text-transform: uppercase;
   cursor: pointer;
   transition: border-color 0.25s;
   outline: none;
+  text-decoration: none;
+  border-color: #000;
 }
 button:hover {
   border-color: #646cff;
@@ -73,7 +74,6 @@ ul li a:hover {
 ul li a.active {
   color: #00a8ff;
 }
-
 .circle-profile{
   display: inline-block;
   width: 50px;
@@ -94,4 +94,11 @@ ul li a.active {
 }
 .tc-g{
   color:green;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; 
+}
+.uppercase-text{
+  text-transform: uppercase;
 }

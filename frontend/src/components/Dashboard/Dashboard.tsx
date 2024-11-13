@@ -3,8 +3,6 @@ import { fetchSpotifyUserData } from '../../utils/spotifyAuth';
 import UserData from './UserData';
 import SpotifyLogout from './SpotifyLogout';
 import MenuBar from '../HomeComponents/MenuBar';
-import FetchPlaylist from './FetchPlaylist';
-
 
 const Dashboard:React.FC = () => {
     const [userData, setUserData] = useState<any>(null);

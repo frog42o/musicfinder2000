@@ -9,7 +9,7 @@ const SpotifyLogin: React.FC = () => {
         window.location.href = getSpotifyAuthUrl();
     }
     return (
-        <Button className="btn btn-success <d-block mt-1 w-100> text-white" onClick={spotifyLogin}>
+        <Button className="btn btn-success uppercase-text d-block mt-1 w-100 text-white" onClick={spotifyLogin}>
              <img 
                 className="mb-1"
                 src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Primary_Logo_RGB_Green.png" 

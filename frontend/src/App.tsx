@@ -7,6 +7,7 @@ import NoMatch from "./components/NoMatch"
 import CallBack from './CallBack'
 import Dashboard from './components/Dashboard/Dashboard'
 import { Authorization } from './utils/Authorization'
+import AnalyzePlaylist from './components/AnalyzePlaylist/AnalyzePlaylist'
 function App() {
   return (
     <>
@@ -15,6 +16,7 @@ function App() {
         <Route path ="/" element={<Home/>}/>
         <Route path = "/callback" element = {<CallBack/>}/>
         <Route path = "/dashboard" element = {<Dashboard/>}/>
+        <Route path = "/analyze" element = {<AnalyzePlaylist/>}/>
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </Authorization>
