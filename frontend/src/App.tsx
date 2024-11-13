@@ -1,18 +1,23 @@
 
 import './App.css'
 import {Routes, Route} from 'react-router-dom'
-import Home from './components/Home'
-import Profile from './components/Profile'
+import Home from './components/HomeComponents/Home'
 
 import NoMatch from "./components/NoMatch"
+import CallBack from './CallBack'
+import Dashboard from './components/Dashboard/Dashboard'
+import { Authorization } from './utils/Authorization'
 function App() {
   return (
     <>
-    <Routes>
-      <Route path ="/" element={<Home/>}/>
-      <Route path ="/profile" element={<Profile/>}/>
-      <Route path="*" element={<NoMatch />} />
-    </Routes>
+    <Authorization>
+      <Routes>
+        <Route path ="/" element={<Home/>}/>
+        <Route path = "/callback" element = {<CallBack/>}/>
+        <Route path = "/dashboard" element = {<Dashboard/>}/>
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+    </Authorization>
     </>
   )
 }

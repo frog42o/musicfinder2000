@@ -1,6 +1,11 @@
-import { Button } from "react-bootstrap";
-import MenuBar from '../components/MenuBar'
-function Home(){
+import SpotifyLogin from './SpotifyLogin';
+import MenuBar from './MenuBar'
+import { Button } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../utils/Authorization';
+
+const Home: React.FC = () => {
+    const { isAuthenticated} = useAuth();
     return(
         <>
         <div className="container-sm bg-secondary-subtle p-5 py-3 d-flex flex-column align-items-center mx-auto rounded-5 shadow ">
@@ -8,7 +13,7 @@ function Home(){
             <p className="text-center">a little project that uses a little of everything to find you some new music!</p>
             <div className="bg-light d-flex flex-column align-items-center p-4 py-3 col rounded-4"> 
                 <MenuBar/>
-                <Button className="btn btn-success d-block mt-1 w-100 text-white">Login with Spotify</Button>
+                {isAuthenticated? <Button><NavLink className="nav-link active" to ="/dashboard">Dashboard</NavLink></Button>: <SpotifyLogin/>}
             </div>
         </div>
         </>

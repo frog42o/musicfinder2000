@@ -36,10 +36,10 @@ function MenuBar(){
                 <NavLink className="nav-link active" to="/"> Home</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link active" to="/profile"> Profile</NavLink>
+                <NavLink className="nav-link active" to="/dashboard"> Dashboard</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link active" to="/"> Settings</NavLink>
+                <NavLink className="nav-link active" to="*"> Settings</NavLink>
             </li>
           </ul>
         </div>
