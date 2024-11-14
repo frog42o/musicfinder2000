@@ -7,7 +7,8 @@ import axios from 'axios';
 import { fetchArtistGenre, getTopGenres } from './music_analysis/musicAnalysis';
 import Error from '../../components/Error'
 
-const BASE = "https://api.spotify.com/v1/playlists";
+const PLAYLIST_URL = "https://api.spotify.com/v1/playlists";
+const ARTIST_URL = "https://api.spotify.com/v1/artists"
 
 const AnalyzePlaylist: React.FC = () => {
     const location = useLocation();
@@ -15,7 +16,7 @@ const AnalyzePlaylist: React.FC = () => {
     const playlist = location.state?.playlist;
 
     const [genreLoading, setGenreLoading] = useState<boolean>(true);
-    const [genreProgress, setGenreProgress] = useState<number>(0);
+    //const [genreProgress, setGenreProgress] = useState<number>(0);
 
     const {accessToken} = useAuth();
     const [loading, setLoading] = useState<boolean>(true);
@@ -32,16 +33,46 @@ const AnalyzePlaylist: React.FC = () => {
     useEffect(()=>{
         const fetchSongs = async() =>{
             try{
-                const response = await axios.get(`${BASE}/${playlist.id}/tracks`, {
+                const response = await axios.get(`${PLAYLIST_URL}/${playlist.id}/tracks`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
-                //console.log(response.data.items);
                 setSongs(response.data.items);
-                const fetchGenre = await fetchArtistGenre(accessToken, songs, setGenreProgress);
-                const genre_data = getTopGenres(fetchGenre);
-                setTopGenres(genre_data);
+                //const genres: Record<string, number> = {}
+
+                let artistIDsList = [];
+
+                for(const song of response.data.items){
+                    const artistIDs =  song.track.artists.map((artist: { id: string }) => artist.id);
+                    for(const id of artistIDs){
+                        artistIDsList.push(id);
+                    }
+                }
+                const getArtistIds = artistIDsList.splice(0, 50); 
+                try {
+                    console.log("current batch: ", getArtistIds);
+                    const artist_data = await axios.get(`${ARTIST_URL}?ids=${getArtistIds.join(",")}`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }); 
+                    if (artist_data.status === 429) {
+                        // Get Retry-After header
+                        const retryAfterHeader = artist_data.headers['retry-after'];
+                        console.log("lol, ", retryAfterHeader);
+                    }
+                    console.log(artist_data.data.items);  
+                    // response2.data.artist.genres.forEach((genre: string) => {
+                    //     genres[genre] = (genres[genre] || 0) + 1;
+                    //  });
+
+                } catch(err){
+                    console.log(err);
+                    throw err;
+                }
+                console.log("All API calls completed!");
+                //console.log("Genres count:", genres);
                 setGenreLoading(false);
             }
             catch (err){
@@ -51,7 +82,7 @@ const AnalyzePlaylist: React.FC = () => {
             }
         };
         fetchSongs();
-    }, [accessToken, songs]);
+    }, [accessToken]);
     if (loading) {
         return <p>Loading songs from playlist <strong>{playlist.name}</strong>...</p>;
     }
@@ -63,22 +94,8 @@ const AnalyzePlaylist: React.FC = () => {
             <p><strong>Owner:</strong> {playlist.owner.display_name}</p>
             <p><strong>Tracks:</strong> {playlist.tracks.total}</p>
             <p><strong>Description:</strong> {playlist.description || 'No description available.'}</p>
-            {genreLoading ? (
-                <div className="progress" style={{ height: "30px", width: "100%" }}>
-                    <div
-                        className="progress-bar progress-bar-striped progress-bar-animated"
-                        role="progressbar"
-                        style={{ width: `${genreProgress}%` }}
-                        aria-valuenow={genreProgress}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                    >
-                        {genreProgress}%
-                    </div>
-                </div>
-            ) : (
-                <p><strong>Genres: </strong>{topGenres.length > 0? topGenres.join(" / "): "No genres found."}</p>
-            )}
+        
+            <p><strong>Genres: </strong>{topGenres.length > 0? topGenres.join(" / "): "No genres found."}</p>
            
         </div>
         <div className='d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border border-dark ' style={{

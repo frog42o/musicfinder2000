@@ -1,37 +1,61 @@
 
-
+import axios from 'axios'
 const BASE = "https://api.spotify.com/v1/artists"
 
+async function fetchData(artistIds: any[], accessToken: string) {
+    try{
+        const url = `${BASE}?ids=${artistIds.join(",")}`;
+        const options = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const response = await axios.get(url, options);
+        return response.data;
 
-export const fetchArtistGenre = async(accessToken: string, songs: any[], onProgress?: (progress: number) => void ) =>{
+    } catch (err){
+        console.log(err);
+        throw err;
+    }
+}
+
+
+export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
     try{
         const genres: Record<string, number> = {}
-        const totalSongs = songs.length;
-        let processedSongs = 0;
+
+        let artistIDsList = [];
+
         for(const song of songs){
             const artistIDs =  song.track.artists.map((artist: { id: string }) => artist.id);
-            for (const artistId of artistIDs) {
-                const response = await fetch(`${BASE}/${artistId}`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
-                if (!response.ok) {
-                    console.error(`Failed to fetch data for artist ID: ${artistId}`);
-                    continue;
-                }
-
-                const data = await response.json();
-                data.genres.forEach((genre: string) => {
-                    genres[genre] = (genres[genre] || 0) + 1;
-                });
-
-                processedSongs++;
-                if (onProgress) {
-                    onProgress(Math.round((processedSongs / totalSongs) * 100));
-                }
+            for(const id of artistIDs){
+                artistIDsList.push(id);
             }
         }
+
+        let remainingArtist = artistIDsList.length;
+        (async () => {
+            while (remainingArtist > 0) {
+            const currentBatchSize = Math.min(remainingArtist, 50);
+            const getArtistIds = artistIDsList.splice(0, currentBatchSize); 
+            try {
+                console.log("current batch: ", getArtistIds);
+                const response = await fetchData(getArtistIds, accessToken);
+
+                if(response && response.artist){
+                    response.artist.genres.forEach((genre: string) => {
+                        genres[genre] = (genres[genre] || 0) + 1;
+                    });
+                }
+            } catch(err){
+                console.log(err);
+                throw err;
+            }
+            remainingArtist -= currentBatchSize;
+            }
+            console.log("All API calls completed!");
+            console.log("Genres count:", genres);
+        })();
         return genres;
     }
     catch(err){

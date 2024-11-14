@@ -11,8 +11,8 @@ const CallBack: React.FC = () => {
             const params = new URLSearchParams(hash.substring(1));
             const accessToken = params.get("access_token");
             const expiresIn = params.get("expires_in");
-            console.log("Access Token:", accessToken);
-            console.log("Expires In:", expiresIn);
+            //console.log("Access Token:", accessToken);
+            //console.log("Expires In:", expiresIn);
 
             if (accessToken) {
                 sessionStorage.setItem("spotifyAccessToken", accessToken);
