@@ -3,7 +3,7 @@ import { fetchSpotifyUserData } from '../../utils/spotifyAuth';
 import UserData from './UserData';
 import SpotifyLogout from './SpotifyLogout';
 import MenuBar from '../HomeComponents/MenuBar';
-
+import Error from '../../components/Error'
 const Dashboard:React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
     useEffect(() => {
@@ -26,7 +26,7 @@ const Dashboard:React.FC = () => {
         <SpotifyLogout/>
         </>
     ):(
-        <p>Dashboard</p>)}
+        <Error data={{message:"Your access token has expired! Please try again"}}></Error>)}
     </>);
 }
 

@@ -12,3 +12,14 @@ export interface ErrorProps{
         message?:string;
     }
 }
+export interface Playlist{
+    id: string;
+    name: string;
+    description: string;
+    tracks: {
+        total: number;
+    };
+    owner:{
+        display_name: string;
+    };
+}

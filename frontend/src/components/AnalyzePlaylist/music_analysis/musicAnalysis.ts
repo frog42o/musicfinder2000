@@ -34,17 +34,18 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
         }
 
         let remainingArtist = artistIDsList.length;
-        (async () => {
-            while (remainingArtist > 0) {
+        while (remainingArtist > 0) {
             const currentBatchSize = Math.min(remainingArtist, 50);
             const getArtistIds = artistIDsList.splice(0, currentBatchSize); 
             try {
-                console.log("current batch: ", getArtistIds);
+                // /console.log("current batch: ", getArtistIds);
                 const response = await fetchData(getArtistIds, accessToken);
 
-                if(response && response.artist){
-                    response.artist.genres.forEach((genre: string) => {
-                        genres[genre] = (genres[genre] || 0) + 1;
+                if(response){
+                    response.artists.forEach((artist: { genres: string[] }) => {
+                        artist.genres.forEach((genre: string) => {
+                            genres[genre] = (genres[genre] || 0) + 1; 
+                        });
                     });
                 }
             } catch(err){
@@ -52,10 +53,8 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
                 throw err;
             }
             remainingArtist -= currentBatchSize;
-            }
-            console.log("All API calls completed!");
-            console.log("Genres count:", genres);
-        })();
+        }
+            //console.log("Genres count:", genres);
         return genres;
     }
     catch(err){
@@ -64,14 +63,24 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
     }
 }
 export const getTopGenres = (genres: Record<string, number>) => {
-    const sortedGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]);
-    console.log(sortedGenres);
-    if (sortedGenres.length < 3) {
-        return [sortedGenres[0][0]];
+    try{
+        const sortedGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]);
+         // Handle edge cases
+         if (sortedGenres.length === 0) {
+            console.error("No genres to sort");
+            return [];
+        }
+        if (sortedGenres.length < 3) {
+            return sortedGenres.map(([genre]) => genre); // Return all if less than 3
+        }
+
+        const [top1, top2, top3] = sortedGenres;
+
+        const topGenres = [top1[0], top2[0], top3[0]]; // picck top 2 only if dominance isn't clear
+        return topGenres;
     }
-
-    const [top1, top2, top3] = sortedGenres;
-
-    const topGenres = [top1[0], top2[0], top3[0]]; // picck top 2 only if dominance isn't clear
-    return topGenres;
+    catch(err){
+        console.log("error: ", err);
+        throw err;
+    }
 };

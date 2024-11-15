@@ -11,6 +11,8 @@ export const getSpotifyAuthUrl = (): string => {
         "user-read-email",
         "playlist-read-private",
         "playlist-modify-private",
+        "playlist-modify-public",
+        "playlist-modify-private"
     ].join(" ");
     const url = `${SPOTIFY_AUTH_ENDPOINT}?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(
         redirectUri

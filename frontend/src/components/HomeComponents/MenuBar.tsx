@@ -1,6 +1,31 @@
-import {NavLink} from "react-router-dom"
+import {Offcanvas } from "bootstrap";
+import { useEffect } from "react";
+import {useLocation, useNavigate} from "react-router-dom"
 
 function MenuBar(){
+    const location = useLocation();
+    const navigate = useNavigate();
+    useEffect(() => {
+      const offcanvasElement = document.getElementById("offcanvasMenu");
+      if (offcanvasElement) {
+        const offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasElement);
+        offcanvasInstance.hide();
+      }
+    }, [location.pathname]); 
+    const handleNav = (path:string) => {
+      const offcanvasElement = document.getElementById("offcanvasMenu");
+      if (offcanvasElement) {
+        const offcanvasInstance = Offcanvas.getInstance(offcanvasElement) || new Offcanvas(offcanvasElement);
+        offcanvasInstance.hide();
+      }
+
+     if (path === location.pathname) {
+        const backdrop = document.querySelector(".offcanvas-backdrop");
+        if (backdrop) backdrop.remove();
+    }
+
+      navigate(path); 
+    };
     return(
     <>
       <button
@@ -32,14 +57,29 @@ function MenuBar(){
         </div>
         <div className="offcanvas-body">
           <ul className="nav flex-column">
-            <li className="nav-item">
-                <NavLink className="nav-link active" to="/"> Home</NavLink>
+          <li className="nav-item">
+              <button
+                className="btn btn-link nav-link active"
+                onClick={() => handleNav("/")}
+              >
+                Home
+              </button>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link active" to="/dashboard"> Dashboard</NavLink>
+              <button
+                className="btn btn-link nav-link active"
+                onClick={() => handleNav("/dashboard")}
+              >
+                Dashboard
+              </button>
             </li>
             <li className="nav-item">
-                <NavLink className="nav-link active" to="*"> Settings</NavLink>
+              <button
+                className="btn btn-link nav-link active"
+                onClick={() => handleNav("/settings")}
+              >
+                Settings
+              </button>
             </li>
           </ul>
         </div>
