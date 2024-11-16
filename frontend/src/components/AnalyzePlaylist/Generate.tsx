@@ -3,7 +3,6 @@ import { useAuth } from '../../utils/Authorization';
 import { Playlist } from '../../types';
 import { Button, Form } from 'react-bootstrap';
 import Error from '../../components/Error'
-import { Modal } from 'bootstrap';
 import axios from 'axios';
 
 interface PlaylistProps{
@@ -22,10 +21,18 @@ const Generate: React.FC<PlaylistProps> = ({playlist}) =>{
     const [generatePlaylist, setGeneratePlaylist] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
 
+    //HISTORICAL DATA
+    const historicalData = {
+        topTracks: [],
+        recentlyPlayed: [],
+        currentPlaylist: playlist
+      };
+
     const stages = ["analyzing audio feature...", 
         "looking at the genre data...", 
-        "running some machine learning algorithms...", 
-        "asking chatgpt for help...", "success!"];
+        "running some machine learning algorithms... (probably j asking chatgpt xd)", 
+        generateSong? "recommending new songs...": "generating a new playlist...", 
+        "musicfinder2000 has generated something"];
 
     const handleGenerationChoice = (choice:boolean, type:number)=>{
         if(type == 0){
@@ -42,32 +49,68 @@ const Generate: React.FC<PlaylistProps> = ({playlist}) =>{
             //split each bar from 100/5 = 20 , then each stage gets to work from (0-20), then (20-40, then (60-80) then 80-> 100 on success to stimulate a live progress bar and not in blocks
             const currentRange = [(i*20), (i+1)*20];
             setCurrentStage(i); // Update the current stage
-            await handleTask(currentStage, currentRange);
+            await handleTask(currentStage, currentRange, generateSong, generatePlaylist);
             // Simulate each stage with a delay
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         setIsGenerating(false);
     };
-    async function handleTask(stage:number, range:number[]){
+    async function handleTask(stage:number, range:number[], generateSong:boolean, generatePlaylist:boolean){
         switch(stage){
-            case 0:
-                return analyzePlaylistAudio(range);
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
+            case 0: //get all playlist (user playlist data)
+                return await analyzePlaylistAudio();
+            case 1: //prepare historical data by filtering data based on genre,clean data up (duplicates, etc)
+                return await cleanHistoricalData();
+            case 2: //train model using preprocessed historical data w k-means clustering; 
+                return;
+            case 3: //recommending songs based on model [WHERE SONGS AND PLAYLIST GENERATION SPLITS]
+                return;
+            case 4: //success
+                return;
             default:
-                break;
+                return;
         }
     }
-    const analyzePlaylistAudio = (range: number[]) =>{
-        //analyze playlist's audio analysis feature 
+    const analyzePlaylistAudio = async() =>{
+        // fetch user's recently played, and medium-term top tracks as data set for machine learning
+        const USER_TOP_TRACKS_URL = `https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=50&offset=0`;
+        const now = Date.now();
+        const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
+        const USER_RECENTLY_PLAYED_URL =`https://api.spotify.com/v1/me/player/recently-played?limit=50&after=${oneWeekAgo}`;
+        try{
+            if(!accessToken){
+                return;
+            }
+            const topTracks = await axios.get(USER_TOP_TRACKS_URL, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            console.log("Fetched top track!");
+            const recentlyPlayed = await axios.get(USER_RECENTLY_PLAYED_URL, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            console.log("Fetched recently played!");
+            historicalData.topTracks = topTracks.data.items;
+            historicalData.recentlyPlayed = recentlyPlayed.data.items;
+           
+            return 1;
+            
+        }
+        catch(err){
+            console.log(err);
+            throw err;
+        }
+
     }
-    
+    const cleanHistoricalData = () =>{
+        console.log(historicalData.currentPlaylist);
+        console.log(historicalData.recentlyPlayed);
+        console.log(historicalData.topTracks);
+        return 1;
+    }
     
 
     if(!accessToken){

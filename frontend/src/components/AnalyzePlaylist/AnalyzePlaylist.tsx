@@ -16,7 +16,6 @@ const AnalyzePlaylist: React.FC = () => {
     const navigate = useNavigate();
     const playlist = location.state?.playlist;
 
-    //const [genreProgress, setGenreProgress] = useState<number>(0);
 
     const {accessToken} = useAuth();
     const [loading, setLoading] = useState<boolean>(true);
