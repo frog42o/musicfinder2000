@@ -62,7 +62,7 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
         throw err;
     }
 }
-export const getTopGenres = (genres: Record<string, number>) => {
+export const getTopGenres = (genres: Record<string, number>,seedGenres: string[]) => {
     try{
         const sortedGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]);
          // Handle edge cases
@@ -74,13 +74,29 @@ export const getTopGenres = (genres: Record<string, number>) => {
             return sortedGenres.map(([genre]) => genre); // Return all if less than 3
         }
 
-        const [top1, top2, top3] = sortedGenres;
 
-        const topGenres = [top1[0], top2[0], top3[0]]; // picck top 2 only if dominance isn't clear
-        return topGenres;
+        const topGenres = sortedGenres.map(([genre]) => genre);
+    
+        const validTopGenres = topGenres.filter((genre) => seedGenres.includes(genre));
+    
+        return validTopGenres.slice(0, 3);
     }
     catch(err){
         console.log("error: ", err);
         throw err;
     }
 };
+export const fetchSeedGenres = async (accessToken: string) => {
+    const SEED_GENRES_URL = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
+    try {
+      const response = await axios.get(SEED_GENRES_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data.genres;
+    } catch (err) {
+      console.error("Error fetching seed genres:", err);
+      throw err;
+    }
+}

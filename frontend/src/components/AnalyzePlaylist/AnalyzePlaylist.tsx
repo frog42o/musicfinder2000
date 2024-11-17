@@ -4,7 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/Authorization';
 import axios from 'axios';
-import { fetchArtistGenre, getTopGenres } from './music_analysis/musicAnalysis';
+import { fetchArtistGenre, fetchSeedGenres, getTopGenres } from './music_analysis/musicAnalysis';
 import Error from '../../components/Error'
 import EditPlaylistInfo from './EditPlaylistInfo';
 import Generate from './Generate';
@@ -22,6 +22,7 @@ const AnalyzePlaylist: React.FC = () => {
     const [songs, setSongs] = useState<any[]>([]);
     const [topGenres, setTopGenres] = useState<string[] | string[][]>([]);
 
+
     useEffect(()=>{
         if (!accessToken || !playlist) return;
         const fetchSongs = async() =>{
@@ -32,8 +33,10 @@ const AnalyzePlaylist: React.FC = () => {
                     },
                 });
                 setSongs(response.data.items);
+                //console.log(response.data.items);
                 const fetch_genre = await fetchArtistGenre(accessToken, response.data.items);
-                const genre_data = getTopGenres(fetch_genre);
+                const seedGenres = await fetchSeedGenres(accessToken);
+                const genre_data = getTopGenres(fetch_genre, seedGenres);
                 setTopGenres(genre_data);
             }
             catch (err){
@@ -107,7 +110,7 @@ const AnalyzePlaylist: React.FC = () => {
                     <p>Update your playlist information!</p>
                 </div>
                 <div className="col align-self-start ">
-                    <Generate playlist={playlist}/>
+                    <Generate songs={songs} genres={topGenres}/>
                     <p>Recommends songs & generates playlists based on audio analysis, ML, and AI algorithms!</p>
                 </div>
                 <div className="col align-self-start">
