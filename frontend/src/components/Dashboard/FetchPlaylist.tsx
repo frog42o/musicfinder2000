@@ -42,6 +42,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
         fetchPlaylists();
 
     }, [accessToken, data.id]);
+    console.log(playlists);
     const handleAnalyze = () =>{
         if(selectedPlaylist){
             const playlistData =  playlists.find((p) => p.id === selectedPlaylist);
@@ -60,9 +61,66 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
             scrollBehavior: "smooth",
         }}>
             {playlists.map((playlist) => (
-                    <Button onClick={() => setSelectedPlaylist(playlist.id)}
-                    className={`btn d-block mt-1  ${selectedPlaylist === playlist.id ? 'btn-primary' : 'btn-danger'}`} 
-                    key = {playlist.id}>{playlist.name}</Button>
+               <Button
+               onClick={() => setSelectedPlaylist(playlist.id)}
+               className={`d-block mt-2 rounded-3`}
+               key={playlist.id}
+               style={{
+                 textAlign: 'left',
+                 padding: '0.5rem',
+                 display: 'flex',
+                 alignItems: 'center',
+                 backgroundColor: selectedPlaylist === playlist.id ? 'rgba(15, 235, 12,0.4)' : '#e9ecef',
+                 color: selectedPlaylist === playlist.id ? '#ffffff' : 'rgb(0,0,0)', //doesnt work
+                 boxShadow: selectedPlaylist === playlist.id ? "rgb(11, 237, 7) 0px 3px 6px 0px" : "none",
+                 border: selectedPlaylist === playlist.id ? '2px solid #119c10' : '2px solid #ccc',
+               }}
+             >
+               <div className="d-flex align-items-center">
+                 <div
+                   className="me-3"
+                   style={{
+                     height: '64px',
+                     width: '64px',
+                     borderRadius: '8px',
+                     overflow: 'hidden',
+                   }}
+                 >
+                   <img
+                     src={playlist.images?.[0]?.url || ""}
+                     alt={`${playlist.name}'s Cover`}
+                     style={{
+                       height: '100%',
+                       width: '100%',
+                       objectFit: 'cover',
+                       borderRadius: '8px',
+                     }}
+                   />
+                 </div>
+                 <div className="playlist-info">
+                   <h6
+                     style={{
+                       fontSize: '1rem',
+                       fontWeight: 'bold',
+                       margin: 0,
+                       color: selectedPlaylist === playlist.id ? '#007bff' : '#333',
+                     }}
+                   >
+                     {playlist.name}
+                   </h6>
+                   <p
+                     style={{
+                       fontSize: '0.9rem',
+                       color: selectedPlaylist === playlist.id ? '#007bff' : '#666',
+                       margin: 0,
+                       textTransform: 'lowercase',
+                     }}
+                   >
+                     {playlist.owner?.display_name || 'Unknown Owner'}
+                   </p>
+                 </div>
+               </div>
+             </Button>
                 ))}
         </div>
         <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>

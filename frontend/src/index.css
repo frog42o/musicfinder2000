@@ -18,13 +18,12 @@ body {
 }
 
 h3 {
-  text-transform: uppercase;
   font-size: 20px;
   font-weight: 600;
   line-height: 1.1;
 }
 p{
-  text-transform: uppercase;
+
   font-size: 14px;
 }
 
@@ -101,4 +100,45 @@ ul li a.active {
 }
 .uppercase-text{
   text-transform: uppercase;
+}
+
+.playlist-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  border-radius: 0.5rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.playlist-button.selected {
+  background-color: #e9ecef;
+  color:#000;
+  border-color: #007bff;
+}
+
+.playlist-image {
+  height: 128px;
+  width: 128px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-left: 2rem;
+}
+
+.playlist-image img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.playlist-info h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.playlist-info p {
+  font-size: 0.9rem;
+  margin: 0;
 }

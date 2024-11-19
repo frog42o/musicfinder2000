@@ -58,6 +58,7 @@ const AnalyzePlaylist: React.FC = () => {
     if (!playlist) {
         return (<Error data = {{ message: "No playlist data available. Please go back and select a playlist."}}/>);
     }
+    console.log(playlist);
     if (loading) {
         return (<>
         <p>Loading songs from playlist <strong>{playlist.name}</strong>...</p>
@@ -74,14 +75,22 @@ const AnalyzePlaylist: React.FC = () => {
     }
 
     return (<>
-        <div>
-            <h3>Analyzing Your Playlist: <span className='text-success'>{playlist.name}</span></h3>
-            <p><strong>ID:</strong> {playlist.id}</p>
-            <p><strong>Owner:</strong> {playlist.owner.display_name}</p>
-            <p><strong>Tracks:</strong> {playlist.tracks.total}</p>
-            <p><strong>Description:</strong> {playlist.description || 'No description available.'}</p>
-            <p><strong>Genres: </strong>{topGenres.length > 0? topGenres.join(" / "): "No genres found."}</p>   
-            <p><strong>Top Artists: </strong>{artistData.length > 0? artistData.join(" / "): "No artist data found."}</p>           
+        <div className='container-md bg-light d-flex align-items-center p-2 py-3'>
+            <div className="me-3 playlist-image mt-1 shadow">
+                   <img src={playlist.images?.[0]?.url || ""} alt={`${playlist.name}'s Cover`} />
+            </div>
+            <div className="playlist-info mt-3 d-flex flex-row justify-content-center p-2 gap-3">
+                <div className='d-flex flex-column text-start w-100'>
+                    <p style ={{fontSize: "10px", fontWeight:"600", textAlign:"left"}}>{playlist.public? "public": "private"} playlist</p>
+                    <h1>Playlist: <span className='text-success mb-3'>{playlist.name}</span></h1>
+                    <p className = "mt-1"style={{fontSize:"12px"}}> {playlist.description || ''}</p>
+                    <p>{playlist.owner.display_name} • {playlist.tracks.total} songs</p>
+                </div>
+                <div className='container-md bg-light d-flex flex-row text-start w-100' style={{gap:"1.5rem"}}>
+                    <p className="w-100"><strong>Genres: </strong><br/><span style={{fontSize:"12px"}}>{topGenres.length > 0? topGenres.join(" • "): "No genres found."}</span></p>   
+                    <p className='w-100'><strong>Top Artists: </strong> <br/> <span style={{fontSize:"12px"}}></span>{artistData.length > 0? artistData.join(" • "): "No artist data found."}<span/></p>  
+                </div>
+            </div>         
            
         </div>
         <div className='d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border border-dark ' style={{
