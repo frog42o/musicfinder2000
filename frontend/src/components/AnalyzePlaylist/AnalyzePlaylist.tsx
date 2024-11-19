@@ -4,7 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/Authorization';
 import axios from 'axios';
-import { fetchArtistGenre, fetchSeedGenres, getTopGenres } from './music_analysis/musicAnalysis';
+import { fetchArtistData, getArtists, getTopArtistData } from './music_analysis/artistUtil';
 import Error from '../../components/Error'
 import EditPlaylistInfo from './EditPlaylistInfo';
 import Generate from './Generate';
@@ -21,7 +21,8 @@ const AnalyzePlaylist: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [songs, setSongs] = useState<any[]>([]);
     const [topGenres, setTopGenres] = useState<string[] | string[][]>([]);
-
+    const[artistIDs , setArtistIds] = useState<string[]>([]);
+    const [artistData, setArtistData] = useState<string[] | string[][]>([]);
 
     useEffect(()=>{
         if (!accessToken || !playlist) return;
@@ -34,10 +35,14 @@ const AnalyzePlaylist: React.FC = () => {
                 });
                 setSongs(response.data.items);
                 //console.log(response.data.items);
-                const fetch_genre = await fetchArtistGenre(accessToken, response.data.items);
-                const seedGenres = await fetchSeedGenres(accessToken);
-                const genre_data = getTopGenres(fetch_genre, seedGenres);
+                const {genres, artistCount} = await fetchArtistData(accessToken, response.data.items);
+                const genre_data = getTopArtistData(genres);
+                const artists_id = getTopArtistData(artistCount);
+                setArtistIds(artists_id);
+                const top_artists_data = await getArtists(artists_id, accessToken);
+
                 setTopGenres(genre_data);
+                setArtistData(top_artists_data);
             }
             catch (err){
                 console.log("Error fetching songs: ", err);
@@ -75,7 +80,8 @@ const AnalyzePlaylist: React.FC = () => {
             <p><strong>Owner:</strong> {playlist.owner.display_name}</p>
             <p><strong>Tracks:</strong> {playlist.tracks.total}</p>
             <p><strong>Description:</strong> {playlist.description || 'No description available.'}</p>
-            <p><strong>Genres: </strong>{topGenres.length > 0? topGenres.join(" / "): "No genres found."}</p>           
+            <p><strong>Genres: </strong>{topGenres.length > 0? topGenres.join(" / "): "No genres found."}</p>   
+            <p><strong>Top Artists: </strong>{artistData.length > 0? artistData.join(" / "): "No artist data found."}</p>           
            
         </div>
         <div className='d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border border-dark ' style={{
@@ -110,7 +116,7 @@ const AnalyzePlaylist: React.FC = () => {
                     <p>Update your playlist information!</p>
                 </div>
                 <div className="col align-self-start ">
-                    <Generate songs={songs} genres={topGenres}/>
+                    <Generate songs={songs} artists_ids = {artistIDs}/>
                     <p>Recommends songs & generates playlists based on audio analysis, ML, and AI algorithms!</p>
                 </div>
                 <div className="col align-self-start">

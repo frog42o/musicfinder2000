@@ -3,21 +3,25 @@ import { useAuth } from '../../utils/Authorization';
 import { TrackDetailsProps,Track } from '../../types';
 import { Button } from 'react-bootstrap';
 import Error from '../../components/Error'
-import { fetchAPIData, fetchAudioFeatures, fetchRecommendations, findAverageAudioFeature, normalizeAudio } from './music_analysis/dataUtil';
+import { fetchAPIData, fetchAudioFeatures, fetchRecommendations, fetchSongByID, findAverageAudioFeature, normalizeAudio } from './music_analysis/dataUtil';
 import { assignTracksToClusters, filterRecommendationsByCluster, findDominantCluster, kMeansAlgorithm } from './music_analysis/kmeanAnalysis';
 
 
-const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
+const Generate: React.FC<TrackDetailsProps> = ({songs, artists_ids}) =>{
     const {accessToken} = useAuth();
     const [showGenerateModal, setGenerateModal] = useState(false);
     const handleShow = () => setGenerateModal(true);
     const handleHide = () => setGenerateModal(false);
 
     const [progress, setProgress] = useState(0); // Progress value (0 to 100)
-
-    const [generateSong, setGenerateSong] = useState(false);
+    const [stage, setStage] = useState("");
+    const [generateSong, setGenerateSong] = useState(true);
     const [generatePlaylist, setGeneratePlaylist] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [finishedGenerating, setFinishedGenerating] = useState(false);
+
+    const [songData, setSongData] = useState<any | null>(null);
+
 
     //HISTORICAL DATA
     const historicalData = {
@@ -25,7 +29,8 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
         recentlyPlayed: [],
         currentPlaylist: songs
       };
-      
+
+
     let cleanedData: any[] = [];
     let cleanedDataAudioFeatures: any[] = []; //normalized audio feature for cleanedData
     let userPlaylistAudioFeatures: any[] = []; //normalized userplaylist audio features
@@ -33,9 +38,11 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
     let recommendSongsAudioFeaturesList: any[] = [];
 
     let filteredRecommendationsList:any[] = [];
+
+    let selectedSong: any = [];
     const stages = ["fetching historical data...", 
         "analyzing audio features...", 
-        "running some machine learning algorithms... (probably j asking chatgpt xd)", 
+        "running some machine learning algorithms...", 
         generateSong? "recommending new songs...": "generating a new playlist...", 
         "musicfinder2000 has generated something"];
 
@@ -51,9 +58,10 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
     const handleGenerationProcess = async () => {
         setIsGenerating(true);
         for (let i = 0; i < stages.length; i++) { 
+            setStage(stages[i]);
             //split each bar from 100/5 = 20 , then each stage gets to work from (0-20), then (20-40, then (60-80) then 80-> 100 on success to stimulate a live progress bar and not in blocks
             const currentRange = [(i*20), (i+1)*20];
-            await handleTask(i, currentRange);
+            await handleTask(i, currentRange, generateSong, generatePlaylist);
 
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
@@ -61,7 +69,7 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
     };
     async function handleTask(stage:number, range:number[], generateSong?:boolean, generatePlaylist?:boolean){
         switch(stage){
-            case 0: //get all playlist (user playlist data) [0,20]
+            case 0: //get all playlist (user playlist data) 
                 return await fetchHistoricalData(range);
             case 1: //prepare historical data by filtering data based on genre,clean data up (duplicates, etc), AUDIO ANALYSIS [20,40]
                 if(!accessToken)return;
@@ -70,20 +78,17 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
                 cleanHistoricalData([start, start + (end - start)/4]); //[20,25]
                 await analyzeHistoricalData([start + (end - start)/4, end]); //[25,40]
                 const audioRecommendData = findAverageAudioFeature(cleanedDataAudioFeatures); //pass the average into recommendations
-                recommendedSongs = await fetchRecommendations(audioRecommendData, accessToken, range,genres,setProgress);
+                recommendedSongs = await fetchRecommendations(audioRecommendData, accessToken, range, artists_ids, setProgress);
                 return 1;
             case 2: //train model using preprocessed historical data w k-means clustering; 
-                if (recommendedSongs.length === 0) {
-                    console.log("Failed, rec songs didnt generate");
-                    return 0;
-                }
-                await runMachineLearning(recommendedSongs);
+                await runMachineLearning(recommendedSongs, range);
                 return 1;
             case 3: //choose if its a playlist generation or button
-                await musicFinder2000(filteredRecommendationsList, generateSong, generatePlaylist);
-                setProgress(80);
+                await musicFinder2000(filteredRecommendationsList, range, generateSong, generatePlaylist);
                 return;
-            case 4: //return a song
+            case 4: //display song or playlist information
+                setFinishedGenerating(true);
+                setIsGenerating(false);
                 console.log("Generation process complete!");
                 setProgress(100);
                 return;
@@ -158,7 +163,7 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
             simulatedProgress += 1;
             setProgress(Math.min(simulatedProgress, 30));
           }
-        }, Math.floor(Math.random() * (9001)) + 1000); 
+        }, Math.floor(Math.random() * (4001)) + 1000); 
         //console.log("cleaned data: ", cleanedData);
 
         const extractHistoricalDataIds = cleanedData.map((item)=> item.track.id); //gets id from cleaned data
@@ -190,14 +195,22 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
         clearInterval(interval);
         return 1;
     }
-    const runMachineLearning = async(recSongs: any)=>{
+    const runMachineLearning = async(recSongs: any, range:number[])=>{
         if(!accessToken)return;
+        const[start,end] = range;
+        let simulatedProgress = start; 
+        const interval = setInterval(() => {
+          if (simulatedProgress < end) {
+            simulatedProgress += 1;
+            setProgress(Math.min(simulatedProgress, end));
+          }
+        }, Math.floor(Math.random() * (9001)) + 1000); 
         const model = await kMeansAlgorithm(cleanedDataAudioFeatures, userPlaylistAudioFeatures);
         //assign user playlist to model's clusters
         const userPlaylistCluster = assignTracksToClusters(userPlaylistAudioFeatures, model);
         const dominantCluster = findDominantCluster(userPlaylistCluster);
 
-
+        //converts songs into array for mapping
         const songsArray = Array.isArray(recSongs) ? recSongs : [recSongs];
         const consistentSongData = songsArray.map((item) => {
             return item.track
@@ -212,10 +225,36 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
         
         const _filteredRecommendations = filterRecommendationsByCluster(recommendSongsAudioFeaturesList, model, dominantCluster);
         filteredRecommendationsList = _filteredRecommendations;
+        clearInterval(interval);
         return 1;
     }
-    const musicFinder2000 = async(filteredRecommendations:any[], generateSong:boolean, generatePlaylist:boolean)=>{
-
+    const getRandomSong = (arr: any[]): any => {
+        if (arr.length === 0) {
+          console.log("Array is empty, cannot fetch a random element.");
+          return null;
+        }
+        const randomIndex = Math.floor(Math.random() * arr.length);
+        return arr[randomIndex];
+      };
+    const musicFinder2000 = async(filteredRecommendations:any[], range:number[], generateSong:boolean|undefined, generatePlaylist:boolean|undefined)=>{
+        if(!accessToken) return;
+        const[start,end] = range;
+        let simulatedProgress = start; 
+        const interval = setInterval(() => {
+          if (simulatedProgress < end) {
+            simulatedProgress += 1;
+            setProgress(Math.min(simulatedProgress, end));
+          }
+        }, Math.floor(Math.random() * (9001)) + 1000); 
+        if(generateSong){ //fetch first song in filteredRecommendations
+            const grabSong = getRandomSong(filteredRecommendations);
+            selectedSong = await fetchSongByID(accessToken, grabSong.id);
+            //console.log(selectedSong);
+            setSongData(selectedSong);
+        }else if(generatePlaylist){ //generate 10-20 songs in a playlist and return it
+            console.log(filteredRecommendations);
+        }
+        clearInterval(interval);
     }
 
     if(!accessToken){
@@ -234,15 +273,41 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="staticBackdropLabel">musicfinder2000 generator</h1>
+                        <h1 className="modal-title fs-5" id="staticBackdropLabel">musicfinder2000 Generator</h1>
                         <button
                             type="button"
                             className="btn-close"
                             aria-label="Close"
                             onClick={handleHide}
+                            disabled={isGenerating}
                         ></button>
                     </div>
                     <div className="modal-body">
+                        {finishedGenerating? <> 
+                        <div className="d-flex gap-2">
+                            <p className=''>Generated Song:</p>
+                        </div>
+                        {songData && <>
+                        <div className="bg-secondary-subtle border border-dark  d-flex align-items-center justify-content-start mb-1">
+                        <div className='p-2'>
+                            <img
+                                src={songData.album.images?.[0]?.url || ""}
+                                alt={`${songData.name}'s Picture'`}
+                                className="circle-profile border border-dark"
+                            />
+                        </div>
+                        <div className= "p-1 ms-2 d-flex flex-column">
+                        <p className='primary-text mt-1 mb-0' style={{ textAlign: "left" }}>
+                            {songData.name} <span style={{ textTransform: 'lowercase', fontSize: '12px' }}>by: </span>
+                            {songData.artists.map((artist: { name: string }) => (
+                                <span className='secondary-text mb-0 tc-g' style={{ textAlign: "left" }}>
+                                {artist.name} </span>
+                                ))}
+                            </p>
+                        </div>
+                        </div>
+                        </>}
+                        </>:<>
                         <div className="d-flex gap-2">
                         <p className=''>Choose a mode:</p>
                             <Button variant={generateSong ? "success" : "outline-secondary"}
@@ -260,24 +325,21 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, genres}) =>{
                             </Button>
                         </div>
                         <div className='d-flex flex-column align-items-start'>
-                        <p className='mb-1'>yerrr</p>
+                        <p className='mb-1' style={{fontSize:"12px"}}>{stage}</p>
                         <div className="progress w-100" role="progressbar" aria-label="Success example" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
                             <div className="progress-bar bg-success" style={{width:`${progress}%`}}>{Math.floor(progress)}%</div>
                         </div>
                         </div>
+                        </>}
                     </div>
                     <div className="modal-footer">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={handleHide}
-                            disabled={isGenerating}
-                        >
-                            Close
-                        </button>
-                        <button type="button" className="btn btn-success"  onClick={handleGenerationProcess} disabled={isGenerating}>
-                            {isGenerating? "Generating...": "Go!"}
-                        </button>
+                        <button type="button" className="btn btn-secondary" onClick={handleHide} disabled={isGenerating}>Close</button>
+                        {finishedGenerating?<>
+                        <button type="button" className='btn btn-primary'>Add to Playlist</button>
+                        <button type="button" className='btn btn-success'>Regenerate</button>
+                        </>:<>
+                        <button type="button" className="btn btn-success"  onClick={handleGenerationProcess} disabled={isGenerating}>{isGenerating? "Generating...": "Go!"}</button>
+                        </>}
                     </div>
                 </div>
             </div>

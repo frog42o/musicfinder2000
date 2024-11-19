@@ -1,6 +1,18 @@
 import axios from 'axios'
 
-
+export const fetchSongByID = async(accessToken:string, id:any)=>{
+  try{
+    const response = await axios.get(`https://api.spotify.com/v1/tracks/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    });
+    return response.data;
+  }catch(err){
+    console.log(err);
+    throw err;
+  }
+}
 export const fetchAPIData = async (url:string, range: number[], accessToken:string,  setProgress: (progress: number) => void) => {
     const [start, end] = range; 
     const rangeSpan = end - start; 
@@ -56,7 +68,7 @@ export const fetchRecommendations = async (
   data: Record<string, number>,
   accessToken: string,
   range: number[],
-  genres: string[] | string[][],
+  artists_ids:string[],
   setProgress: (progress: number) => void
 ) => {
   if (!accessToken) return [];
@@ -78,7 +90,7 @@ export const fetchRecommendations = async (
       target_time_signature: data.time_signature,
     };
 
-    const url = `https://api.spotify.com/v1/recommendations?limit=100&seed_genres=${genres}&target_danceability=${features.target_danceability}&
+    const url = `https://api.spotify.com/v1/recommendations?limit=100&seed_artists=${artists_ids}&target_danceability=${features.target_danceability}&
     target_energy=${features.target_energy}&
     target_loudness=${features.target_loudness}&
     target_speechiness=${features.target_speechiness}&

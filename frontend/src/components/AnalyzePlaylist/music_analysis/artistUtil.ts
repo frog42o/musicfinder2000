@@ -2,7 +2,7 @@
 import axios from 'axios'
 const BASE = "https://api.spotify.com/v1/artists"
 
-async function fetchData(artistIds: any[], accessToken: string) {
+async function fetchArtistDataByIds(artistIds: any[], accessToken: string) {
     try{
         const url = `${BASE}?ids=${artistIds.join(",")}`;
         const options = {
@@ -18,18 +18,17 @@ async function fetchData(artistIds: any[], accessToken: string) {
         throw err;
     }
 }
-
-
-export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
+export const fetchArtistData = async(accessToken: string, songs: any[] ) =>{
     try{
         const genres: Record<string, number> = {}
-
+        const artistCount: Record<string, number> = {}; // To store artist counts
         let artistIDsList = [];
 
         for(const song of songs){
             const artistIDs =  song.track.artists.map((artist: { id: string }) => artist.id);
             for(const id of artistIDs){
                 artistIDsList.push(id);
+                artistCount[id] = (artistCount[id] || 0) + 1;
             }
         }
 
@@ -39,7 +38,7 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
             const getArtistIds = artistIDsList.splice(0, currentBatchSize); 
             try {
                 // /console.log("current batch: ", getArtistIds);
-                const response = await fetchData(getArtistIds, accessToken);
+                const response = await fetchArtistDataByIds(getArtistIds, accessToken);
 
                 if(response){
                     response.artists.forEach((artist: { genres: string[] }) => {
@@ -55,48 +54,43 @@ export const fetchArtistGenre = async(accessToken: string, songs: any[] ) =>{
             remainingArtist -= currentBatchSize;
         }
             //console.log("Genres count:", genres);
-        return genres;
+        return {genres,artistCount};
     }
     catch(err){
         console.log(err);
         throw err;
     }
 }
-export const getTopGenres = (genres: Record<string, number>,seedGenres: string[]) => {
+export const getTopArtistData = (data: Record<string, number>) => {
     try{
-        const sortedGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]);
-         // Handle edge cases
-         if (sortedGenres.length === 0) {
+        const sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+         if (sortedData.length === 0) {
             console.error("No genres to sort");
-            return [];
+            return [];  
         }
-        if (sortedGenres.length < 3) {
-            return sortedGenres.map(([genre]) => genre); // Return all if less than 3
+        if (sortedData.length < 3) {
+            return sortedData.map(([item]) => item); // Return all if less than 3
         }
 
 
-        const topGenres = sortedGenres.map(([genre]) => genre);
-    
-        const validTopGenres = topGenres.filter((genre) => seedGenres.includes(genre));
-    
-        return validTopGenres.slice(0, 3);
+        const [top1, top2, top3] = sortedData;
+
+        const topGenres = [top1[0], top2[0], top3[0]];
+        return topGenres;
     }
     catch(err){
         console.log("error: ", err);
         throw err;
     }
 };
-export const fetchSeedGenres = async (accessToken: string) => {
-    const SEED_GENRES_URL = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
+export const getArtists = async(artistData:string[], accessToken:string)=>{
     try {
-      const response = await axios.get(SEED_GENRES_URL, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      return response.data.genres;
-    } catch (err) {
-      console.error("Error fetching seed genres:", err);
-      throw err;
+        const response = await fetchArtistDataByIds(artistData, accessToken);;
+        const artistNames = response.artists.map((artist: { name: string }) => artist.name);
+        return artistNames;
+    } catch(err){
+        console.log(err);
+        throw err;
     }
 }

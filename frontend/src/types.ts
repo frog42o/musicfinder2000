@@ -32,7 +32,7 @@ export interface Track {
       name: string;
       images: { url: string }[];
     };
-    artists: { name: string }[];
+    artists: { id: string; name: string }[];
   }
 export interface Song {
     track: Track;
@@ -40,5 +40,5 @@ export interface Song {
   
 export interface TrackDetailsProps {
     songs: Song[];
-    genres: string[]|string[][];
+    artists_ids: string[];
   }
