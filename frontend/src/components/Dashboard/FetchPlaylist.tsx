@@ -62,7 +62,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                     return newIndex;
                 });
                 setAnimationDirection(null);
-            }, 300);
+            }, 500);
         }
     }
     const handleForward = () =>{
@@ -75,7 +75,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                     return newIndex;
                 });
                 setAnimationDirection(null);
-            }, 300);
+            }, 500);
         }
     }
     if (loading) {
@@ -83,49 +83,42 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
     }
     
     return (<>
-    <h6>Select a playlist to analyze!</h6>
-        <div className={`bg-light p-3 py-1 d-flex flex-column text-center overflow-auto hidden-scrollbar border ${animationDirection ? `slide-${animationDirection}` : ""}`}  style={{
-            maxHeight:"350px",
-            width:"600px",
-            scrollBehavior: "smooth",
-        }}>
-            {playlists.length > 0 && (
-            <div
-                className={`d-block mt-2 rounded-3 border mb-2`}
-                key={playlists[selectedPlaylistIndex].id}
-                style={{
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor:'#e9ecef',
-                    border:'2px solid #ccc',
+        <h6>Select a playlist to analyze!</h6>
+            <div className='playlist-wrapper'>
+                <div className={`bg-light p-3 py-1 d-flex flex-column text-center overflow-auto hidden-scrollbar border`}  style={{
+                    maxHeight:"350px",
+                    width:"600px",
+                    scrollBehavior: "smooth",
                 }}>
-                <div className="d-flex flex-column justify-content-center text-center">
-                    <div className="mt-3 profile-image ">
-                        <img className="shadow rounded"src={playlists[selectedPlaylistIndex].images?.[0]?.url || ""} alt={`${playlists[selectedPlaylistIndex].name}'s Cover`}
-                        style={{width:"40%"}}/>
-                    </div>
-                    <div className="playlist-info mt-3">
-                    <h6 style={{
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                        margin: 0,
-                        color: '#333',
-                        }}>{playlists[selectedPlaylistIndex].name}
-                    </h6>
-                    <div className='d-flex flex-row justify-content-center text-center mt-n5'>
-                        <button onClick={handleBack} disabled={selectedPlaylistIndex === 0} className="arrow-button">&#8592;</button>
-                        <p style={{ fontSize: '0.9rem',color: '#666',textTransform: 'lowercase',}}>
-                            Playlist •  {playlists[selectedPlaylistIndex].owner?.display_name || 'Unknown Owner'}
-                        <button onClick={handleForward} disabled={selectedPlaylistIndex === playlists.length - 1}className="arrow-button">&#8594;</button>
-                        </p>
-                    </div>
+                {playlists.length > 0 && (
+                <div className={`d-block mt-2 rounded-3 border mb-2 playlist-container ${animationDirection ? `slide-${animationDirection}` : ""}`} key={playlists[selectedPlaylistIndex].id}>
+                    <div className="d-flex flex-column justify-content-center text-center">
+                        <div className="mt-3 profile-image ">
+                            <img className="shadow rounded"src={playlists[selectedPlaylistIndex].images?.[0]?.url || ""} alt={`${playlists[selectedPlaylistIndex].name}'s Cover`}
+                            style={{width:"40%"}}/>
+                        </div>
+                        <div className="playlist-info mt-3">
+                        <h6 style={{
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            margin: 0,
+                            color: '#333',
+                            }}>{playlists[selectedPlaylistIndex].name}
+                        </h6>
+                        <div className='d-flex flex-row justify-content-center text-center mt-n5'>
+                            <button onClick={handleBack} disabled={selectedPlaylistIndex === 0} className="arrow-button">&#8592;</button>
+                            <p style={{ fontSize: '0.9rem',color: '#666',textTransform: 'lowercase',}}>
+                                Playlist •  {playlists[selectedPlaylistIndex].owner?.display_name || 'Unknown Owner'}
+                            <button onClick={handleForward} disabled={selectedPlaylistIndex === playlists.length - 1}className="arrow-button">&#8594;</button>
+                            </p>
+                        </div>
+                        </div>
                     </div>
                 </div>
+                )}
+                </div>
             </div>
-            )}
-        </div>
-    <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>
+        <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>
     </>);
 }
 

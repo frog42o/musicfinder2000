@@ -154,3 +154,39 @@ ul li a.active {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.slide-forward {
+  animation: jiggle 0.3s ease-in-out;
+}
+
+.slide-backward {
+  animation: jiggle 0.3s ease-in-out;
+}
+.playlist-wrapper{
+  overflow:"hidden";
+  height: 350px;
+}
+.playlist-container{
+  text-align: 'left';
+  display: 'flex';
+  align-items: 'center';
+  background-color:'#e9ecef';
+  border:'2px solid #ccc';
+  transition: transform 0.3s ease-in-out;
+}
+@keyframes jiggle {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px); 
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0); 
+  }
+}
