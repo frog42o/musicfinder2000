@@ -13,9 +13,10 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
     const {accessToken} = useAuth();
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState(0);
     const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
     const navigate = useNavigate();
-
+    const [animationDirection, setAnimationDirection] = useState<"forward" | "backward" | null>(null);
 
     useEffect(() => {
         const fetchPlaylists = async () =>{
@@ -32,6 +33,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                 });
                 const userPlaylists = response.data.items.filter((playlist: any) => playlist.owner.id === data.id);
                 setPlaylists(userPlaylists); //store data within playlists
+                setSelectedPlaylist(userPlaylists[0].id); 
                 setLoading(false);
             } 
             catch (err){
@@ -42,7 +44,6 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
         fetchPlaylists();
 
     }, [accessToken, data.id]);
-    console.log(playlists);
     const handleAnalyze = () =>{
         if(selectedPlaylist){
             const playlistData =  playlists.find((p) => p.id === selectedPlaylist);
@@ -51,79 +52,80 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
             alert("Please select a playlist to analyze.");
         }
     }
+    const handleBack = () =>{
+        if(selectedPlaylistIndex >0){
+            setAnimationDirection("backward");
+            setTimeout(() => {
+                setSelectedPlaylistIndex((prev) => {
+                    const newIndex = prev - 1;
+                    setSelectedPlaylist(playlists[newIndex].id);
+                    return newIndex;
+                });
+                setAnimationDirection(null);
+            }, 300);
+        }
+    }
+    const handleForward = () =>{
+        if(selectedPlaylistIndex < playlists.length-1){
+            setAnimationDirection("forward");
+            setTimeout(() => {
+                setSelectedPlaylistIndex((prev) => {
+                    const newIndex = prev + 1;
+                    setSelectedPlaylist(playlists[newIndex].id);
+                    return newIndex;
+                });
+                setAnimationDirection(null);
+            }, 300);
+        }
+    }
     if (loading) {
         return <p>Loading playlists...</p>;
     }
+    
     return (<>
-    <h3>Select a playlist to analyze!</h3>
-        <div className='bg-light p-2 py-1 d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border'  style={{
-            maxHeight:"300px",
+    <h6>Select a playlist to analyze!</h6>
+        <div className={`bg-light p-3 py-1 d-flex flex-column text-center overflow-auto hidden-scrollbar border ${animationDirection ? `slide-${animationDirection}` : ""}`}  style={{
+            maxHeight:"350px",
+            width:"600px",
             scrollBehavior: "smooth",
         }}>
-            {playlists.map((playlist) => (
-               <Button
-               onClick={() => setSelectedPlaylist(playlist.id)}
-               className={`d-block mt-2 rounded-3`}
-               key={playlist.id}
-               style={{
-                 textAlign: 'left',
-                 padding: '0.5rem',
-                 display: 'flex',
-                 alignItems: 'center',
-                 backgroundColor: selectedPlaylist === playlist.id ? 'rgba(15, 235, 12,0.4)' : '#e9ecef',
-                 color: selectedPlaylist === playlist.id ? '#ffffff' : 'rgb(0,0,0)', //doesnt work
-                 boxShadow: selectedPlaylist === playlist.id ? "rgb(11, 237, 7) 0px 3px 6px 0px" : "none",
-                 border: selectedPlaylist === playlist.id ? '2px solid #119c10' : '2px solid #ccc',
-               }}
-             >
-               <div className="d-flex align-items-center">
-                 <div
-                   className="me-3"
-                   style={{
-                     height: '64px',
-                     width: '64px',
-                     borderRadius: '8px',
-                     overflow: 'hidden',
-                   }}
-                 >
-                   <img
-                     src={playlist.images?.[0]?.url || ""}
-                     alt={`${playlist.name}'s Cover`}
-                     style={{
-                       height: '100%',
-                       width: '100%',
-                       objectFit: 'cover',
-                       borderRadius: '8px',
-                     }}
-                   />
-                 </div>
-                 <div className="playlist-info">
-                   <h6
-                     style={{
-                       fontSize: '1rem',
-                       fontWeight: 'bold',
-                       margin: 0,
-                       color: selectedPlaylist === playlist.id ? '#007bff' : '#333',
-                     }}
-                   >
-                     {playlist.name}
-                   </h6>
-                   <p
-                     style={{
-                       fontSize: '0.9rem',
-                       color: selectedPlaylist === playlist.id ? '#007bff' : '#666',
-                       margin: 0,
-                       textTransform: 'lowercase',
-                     }}
-                   >
-                     {playlist.owner?.display_name || 'Unknown Owner'}
-                   </p>
-                 </div>
-               </div>
-             </Button>
-                ))}
+            {playlists.length > 0 && (
+            <div
+                className={`d-block mt-2 rounded-3 border mb-2`}
+                key={playlists[selectedPlaylistIndex].id}
+                style={{
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    backgroundColor:'#e9ecef',
+                    border:'2px solid #ccc',
+                }}>
+                <div className="d-flex flex-column justify-content-center text-center">
+                    <div className="mt-3 profile-image ">
+                        <img className="shadow rounded"src={playlists[selectedPlaylistIndex].images?.[0]?.url || ""} alt={`${playlists[selectedPlaylistIndex].name}'s Cover`}
+                        style={{width:"40%"}}/>
+                    </div>
+                    <div className="playlist-info mt-3">
+                    <h6 style={{
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        margin: 0,
+                        color: '#333',
+                        }}>{playlists[selectedPlaylistIndex].name}
+                    </h6>
+                    <div className='d-flex flex-row justify-content-center text-center mt-n5'>
+                        <button onClick={handleBack} disabled={selectedPlaylistIndex === 0} className="arrow-button">&#8592;</button>
+                        <p style={{ fontSize: '0.9rem',color: '#666',textTransform: 'lowercase',}}>
+                            Playlist •  {playlists[selectedPlaylistIndex].owner?.display_name || 'Unknown Owner'}
+                        <button onClick={handleForward} disabled={selectedPlaylistIndex === playlists.length - 1}className="arrow-button">&#8594;</button>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            )}
         </div>
-        <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>
+    <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>
     </>);
 }
 

@@ -7,7 +7,11 @@ const Error: React.FC<ErrorProps> =({data}) =>{
 
     const navigate = useNavigate();
     const refreshPage =()=>{
-        navigate("/")
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        sessionStorage.clear();
+        document.cookie = ""; 
+        navigate("/");
         window.location.reload();
     }
     return(<>
