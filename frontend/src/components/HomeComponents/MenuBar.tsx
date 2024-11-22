@@ -29,7 +29,7 @@ function MenuBar(){
     return(
     <>
       <button
-        className="btn btn-secondary uppercase-text w-100 text-white mt-1" 
+        className="playlist-btn w-100" 
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasMenu"

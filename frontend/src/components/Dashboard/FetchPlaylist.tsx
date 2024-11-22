@@ -5,6 +5,8 @@ import axios from 'axios';
 import { UserDataProps } from '../../types';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import MenuBar from '../HomeComponents/MenuBar';
+import SpotifyLogout from './SpotifyLogout';
 
 const SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1/users";
 
@@ -83,15 +85,14 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
     }
     
     return (<>
-        <h6>Select a playlist to analyze!</h6>
             <div className='playlist-wrapper'>
-                <div className={`bg-light p-3 py-1 d-flex flex-column text-center overflow-auto hidden-scrollbar border`}  style={{
+                <div className={`blur-container p-3 py-1 d-flex flex-column text-center overflow-auto hidden-scrollbar rounded-3 shadow`}  style={{
                     maxHeight:"350px",
                     width:"600px",
                     scrollBehavior: "smooth",
                 }}>
                 {playlists.length > 0 && (
-                <div className={`d-block mt-2 rounded-3 border mb-2 playlist-container ${animationDirection ? `slide-${animationDirection}` : ""}`} key={playlists[selectedPlaylistIndex].id}>
+                <div className={`d-block mt-2 rounded-3 mb-2 playlist-container ${animationDirection ? `slide-${animationDirection}` : ""}`} key={playlists[selectedPlaylistIndex].id}>
                     <div className="d-flex flex-column justify-content-center text-center">
                         <div className="mt-3 profile-image ">
                             <img className="shadow rounded"src={playlists[selectedPlaylistIndex].images?.[0]?.url || ""} alt={`${playlists[selectedPlaylistIndex].name}'s Cover`}
@@ -100,16 +101,14 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                         <div className="playlist-info mt-3">
                         <h6 style={{
                             fontSize: '1rem',
-                            fontWeight: 'bold',
                             margin: 0,
-                            color: '#333',
                             }}>{playlists[selectedPlaylistIndex].name}
                         </h6>
                         <div className='d-flex flex-row justify-content-center text-center mt-n5'>
-                            <button onClick={handleBack} disabled={selectedPlaylistIndex === 0} className="arrow-button">&#8592;</button>
-                            <p style={{ fontSize: '0.9rem',color: '#666',textTransform: 'lowercase',}}>
+                            <button onClick={handleBack} disabled={selectedPlaylistIndex === 0} className="arrow-button tc-w" >&#8592;</button>
+                            <p style={{ fontSize: '0.9rem',textTransform: 'lowercase',}}>
                                 Playlist •  {playlists[selectedPlaylistIndex].owner?.display_name || 'Unknown Owner'}
-                            <button onClick={handleForward} disabled={selectedPlaylistIndex === playlists.length - 1}className="arrow-button">&#8594;</button>
+                            <button onClick={handleForward} disabled={selectedPlaylistIndex === playlists.length - 1}className="arrow-button tc-w">&#8594;</button>
                             </p>
                         </div>
                         </div>
@@ -118,7 +117,12 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                 )}
                 </div>
             </div>
-        <Button onClick = {handleAnalyze} className="btn btn-dark w-100 d-block mt-1 uppercase-text text-white"> Analyze</Button>
+        <div className='d-flex flex-row text-center w-100 gap-3 mt-3 playlist-btn-container ms-auto tc-w'>  
+            <MenuBar/>|
+            <button onClick = {handleAnalyze} className="playlist-btn w-100 "> Select </button>|
+            <SpotifyLogout/>
+        </div>
+      
     </>);
 }
 

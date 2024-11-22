@@ -15,7 +15,7 @@ const Error: React.FC<ErrorProps> =({data}) =>{
         window.location.reload();
     }
     return(<>
-        {data?<p>Error: {data.message}</p>: <></>}
+        {data?<p className='tc-w'>Error: {data.message}</p>: <></>}
         <Button className="btn btn-success mt-1 uppercase-text" onClick={refreshPage}>Return Home</Button>
     </>);
 }

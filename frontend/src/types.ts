@@ -1,5 +1,6 @@
 export interface UserDataProps {
     data: {
+        followers: any;
         display_name: string;
         email: string;
         images?: { url: string }[];
@@ -41,4 +42,5 @@ export interface Song {
 export interface TrackDetailsProps {
     songs: Song[];
     artists_ids: string[];
+    playlist: any;
   }

@@ -13,6 +13,16 @@ export const fetchSongByID = async(accessToken:string, id:any)=>{
     throw err;
   }
 }
+export const addSongToPlaylist = async(accessToken:String, playlistID:string, songUri:string) =>{
+  if(!accessToken) return false;;
+  try{
+    //await axios.post();
+  }catch(err){
+    console.log(err);
+    return false;
+  }
+
+}
 export const fetchAPIData = async (url:string, range: number[], accessToken:string,  setProgress: (progress: number) => void) => {
     const [start, end] = range; 
     const rangeSpan = end - start; 

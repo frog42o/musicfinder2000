@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { useAuth } from '../../utils/Authorization';
 import { Playlist } from '../../types';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Error from '../../components/Error'
 import { Modal } from 'bootstrap';
 import axios from 'axios';
@@ -64,9 +64,11 @@ const EditPlaylistInfo: React.FC<PlaylistProps> = ({playlist}) =>{
     }
 
     return (<>
-         <Button className="btn btn-primary mb-2 uppercase-text" data-bs-toggle="modal" data-bs-target="#staticBackdrop"onClick={handleShow}>Edit Playlist</Button>
+     <OverlayTrigger placement="top"overlay={<Tooltip>Update your playlist information!</Tooltip>}>
+         <Button className="playlist-btn w-100" data-bs-toggle="modal" data-bs-target="#staticBackdrop"onClick={handleShow}>Edit Playlist</Button>
+    </OverlayTrigger> 
             <div
-                className={`modal fade ${showEditInfoModal ? "show d-block" : ""}`}
+                className={`tc-b modal fade ${showEditInfoModal ? "show d-block" : ""}`}
                 id="staticBackdrop"
                 data-bs-backdrop="static"
                 data-bs-keyboard="false"
@@ -142,6 +144,7 @@ const EditPlaylistInfo: React.FC<PlaylistProps> = ({playlist}) =>{
                                 Close
                             </button>
                             <button type="button" className="btn btn-success" data-bs-dismiss="modal" onClick={handleProfileUpdate}>
+                                
                                 Update
                             </button>
                         </div>

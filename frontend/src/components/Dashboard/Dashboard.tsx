@@ -1,8 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { fetchSpotifyUserData } from '../../utils/spotifyAuth';
 import UserData from './UserData';
-import SpotifyLogout from './SpotifyLogout';
-import MenuBar from '../HomeComponents/MenuBar';
 import Error from '../../components/Error'
 const Dashboard:React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -20,10 +18,10 @@ const Dashboard:React.FC = () => {
     }, []);
     return (<>{
         userData? (<>
-        <h3>musicfinder2000</h3>
-        <UserData data = {userData}/>
-        <MenuBar/>
-        <SpotifyLogout/>
+        <div className='tc-w mb-5 primary-text text-start'>
+            <h5 style={{marginLeft:"12px"}}>musicfinder2000</h5>
+            <UserData data = {userData}/>
+        </div>
         </>
     ):(
         <Error data={{message:"Your access token has expired! Please try again"}}></Error>)}

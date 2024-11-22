@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/Authorization';
@@ -58,10 +58,9 @@ const AnalyzePlaylist: React.FC = () => {
     if (!playlist) {
         return (<Error data = {{ message: "No playlist data available. Please go back and select a playlist."}}/>);
     }
-    console.log(playlist);
     if (loading) {
         return (<>
-        <p>Loading songs from playlist <strong>{playlist.name}</strong>...</p>
+        <p className='tc-w'>Loading songs from playlist <strong>{playlist.name}</strong>...</p>
         <NavLink to = "/dashboard">Taking too long? Return to the Dashboard.</NavLink>
         </>);
     }
@@ -75,29 +74,29 @@ const AnalyzePlaylist: React.FC = () => {
     }
 
     return (<>
-        <div className='container-md bg-light d-flex align-items-center p-2 py-3'>
+        <div className='container-md blur-container d-flex align-items-center p-2 py-3'>
             <div className="me-3 playlist-image mt-1 shadow">
                    <img src={playlist.images?.[0]?.url || ""} alt={`${playlist.name}'s Cover`} />
             </div>
-            <div className="playlist-info mt-3 d-flex flex-row justify-content-center p-2 gap-3">
-                <div className='d-flex flex-column text-start w-100'>
-                    <p style ={{fontSize: "10px", fontWeight:"600", textAlign:"left"}}>{playlist.public? "public": "private"} playlist</p>
-                    <h1>Playlist: <span className='text-success mb-3'>{playlist.name}</span></h1>
-                    <p className = "mt-1"style={{fontSize:"12px"}}> {playlist.description || ''}</p>
-                    <p>{playlist.owner.display_name} • {playlist.tracks.total} songs</p>
+            <div className="playlist-info mt-3 d-flex flex-row justify-content-center p-2 gap-">
+                <div className='d-flex flex-column text-start w-50'>
+                    <p style ={{fontSize: "10px", fontWeight:"600", textAlign:"left", letterSpacing:"2px"}}>{playlist.public? "public": "private"} playlist</p>
+                    <h1 className='primary-text'>Playlist: <span className='text-success mb-3'>{playlist.name}</span></h1>
+                    <p className = "mt-1 secondary-text"style={{fontSize:"12px"}}> {playlist.description || ''}</p>
+                    <p className='secondary-text'>{playlist.owner.display_name} • {playlist.tracks.total} songs</p>
                 </div>
-                <div className='container-md bg-light d-flex flex-row text-start w-100' style={{gap:"1.5rem"}}>
-                    <p className="w-100"><strong>Genres: </strong><br/><span style={{fontSize:"12px"}}>{topGenres.length > 0? topGenres.join(" • "): "No genres found."}</span></p>   
-                    <p className='w-100'><strong>Top Artists: </strong> <br/> <span style={{fontSize:"12px"}}></span>{artistData.length > 0? artistData.join(" • "): "No artist data found."}<span/></p>  
+                <div className='d-flex flex-row text-start w-100' style={{gap:"1rem"}}>
+                    <p className="w-100"><span className='primary-text'>Genres: </span><br/><span className='secondary-text'>{topGenres.length > 0? topGenres.join(" • "): "No genres found."}</span></p>   
+                    <p className='w-100'><span className='primary-text'>Top Artists: </span> <br/> <span className='secondary-text'></span>{artistData.length > 0? artistData.join(" • "): "No artist data found."}<span/></p>  
                 </div>
             </div>         
            
         </div>
-        <div className='d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border border-dark ' style={{
+        <div className=' mt-3 blur-container d-flex flex-column justify-content-start overflow-auto hidden-scrollbar border border-light' style={{
             maxHeight:"300px",
         }}>
         {songs.map((song) => (<>
-            <div className="bg-secondary-subtle border border-dark  d-flex align-items-center justify-content-start mb-1" key={song.track.id}>
+            <div className="d-flex align-items-center justify-content-start py-1" style={{border:"none"}} key={song.track.id}>
                 <div className='p-2'>
                     <img
                         src={song.track.album.images?.[0]?.url || ""}
@@ -106,37 +105,31 @@ const AnalyzePlaylist: React.FC = () => {
                     />
                 </div>
                 <div className= "p-1 ms-2 d-flex flex-column">
-                <p className='primary-text mt-1 mb-0' style={{ textAlign: "left" }}>
+                <p className='primary-text mt-1 mb-0' style={{ textAlign: "left", textTransform:'none' }}>
                     {song.track.name} <span style={{ textTransform: 'lowercase', fontSize: '12px' }}>by: </span>
                     {song.track.artists.map((artist: { name: string }, index: number) => (
                         <span className='secondary-text mb-0 tc-g' style={{ textAlign: "left" }} key={`${artist.name}-${index}`}>
                         {artist.name} </span>
                         ))}
-                    </p>
+                </p>
                 </div>
             </div>
+            <hr></hr>
         </>
         ))}
         </div>
-        <div className="container text-center mt-2">
-            <div className="row">
-                <div className="col align-self-start">
-                    <EditPlaylistInfo playlist={playlist}/>
-                    <p>Update your playlist information!</p>
-                </div>
-                <div className="col align-self-start ">
-                    <Generate songs={songs} artists_ids = {artistIDs}/>
-                    <p>Recommends songs & generates playlists based on audio analysis, ML, and AI algorithms!</p>
-                </div>
-                <div className="col align-self-start">
-                    <Button className='btn btn-secondary mb-2 uppercase-text' onClick = {() => navigate(-1)}>Back</Button>
-                    <p>Return back to Dashboard!</p>
-                </div>
+        <div className='mt-3 w-100 gap-3 playlist-btn-container tc-w'>  
+            <div className="col align-self-start">
+                <EditPlaylistInfo playlist={playlist}/>
             </div>
-        </div>
-        <div className='d-flex flex-column justify-content-center mt-2'>
-            
-            
+            <div className="col align-self-start ">  
+                <Generate songs={songs} artists_ids = {artistIDs} playlist={playlist}/>
+            </div>
+            <div className="col align-self-start">
+                <OverlayTrigger placement="top"overlay={<Tooltip>Return back to Dashboard!</Tooltip>}>     
+                    <Button className='playlist-btn w-100' onClick = {() => navigate(-1)}>Back</Button>
+                </OverlayTrigger>
+            </div>
         </div>
         </>
     );
