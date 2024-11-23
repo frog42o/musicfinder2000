@@ -16,7 +16,13 @@ export const fetchSongByID = async(accessToken:string, id:any)=>{
 export const addSongToPlaylist = async(accessToken:String, playlistID:string, songUri:string) =>{
   if(!accessToken) return false;;
   try{
-    //await axios.post();
+    const url = `https://api.spotify.com/v1/playlists/${playlistID}/tracks?uris=${songUri}`;
+    await axios.post(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return true;
   }catch(err){
     console.log(err);
     return false;

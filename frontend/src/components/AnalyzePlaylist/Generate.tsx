@@ -296,6 +296,12 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, artists_ids, playlist}) =
             throw err;
         }
     }
+    const regenerate = async() =>{
+        if(!accessToken)return;
+        const newSong = getRandomSong(filteredRecommendationsList);
+        selectedSong = await fetchSongByID(accessToken, newSong.id);
+        setSongData(selectedSong);
+    }
     if(!accessToken){
         return(<Error data={{message:"Access Token has expired, please try again!"}}></Error>);
     }
@@ -384,8 +390,8 @@ const Generate: React.FC<TrackDetailsProps> = ({songs, artists_ids, playlist}) =
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" onClick={handleHide} disabled={isGenerating}>Close</button>
                         {finishedGenerating?<>
-                        <button type="button" className='btn btn-primary'>Add to Playlist</button>
-                        <button type="button" className='btn btn-success'>Regenerate</button>
+                        <button type="button" className='btn btn-primary' onClick={addToPlaylist}>Add to Playlist</button>
+                        <button type="button" className='btn btn-success' onClick={regenerate}>Regenerate</button>
                         </>:<>
                         <button type="button" className="btn btn-success"  onClick={handleGenerationProcess} disabled={isGenerating}>{isGenerating? "Generating...": "Go!"}</button>
                         </>}
