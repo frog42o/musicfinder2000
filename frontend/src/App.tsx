@@ -17,7 +17,7 @@ function App() {
         <Route path ="/" element={<Home/>}/>
         <Route path = "/callback" element = {<CallBack/>}/>
         <Route path = "/dashboard" element = {<Dashboard/>}/>
-        <Route path = "/analyze" element = {<AnalyzePlaylist/>}/>
+        <Route path = "/analyze/:playlistId" element = {<AnalyzePlaylist/>}/>
         <Route path = "/error" element = {<Error data={{message:""}}/>}/>
         <Route path="*" element={<NoMatch />} />
       </Routes>

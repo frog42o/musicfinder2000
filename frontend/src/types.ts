@@ -42,5 +42,9 @@ export interface Song {
 export interface TrackDetailsProps {
     songs: Song[];
     artists_ids: string[];
-    playlist: any;
+    playlistID: string;
+    setGenerateProgress: (value: number) => void;
+    setGenerateStage: (value:string) =>void;
+    setIsGenerating: (value:boolean) =>void;
+    isGenerating : boolean;
   }

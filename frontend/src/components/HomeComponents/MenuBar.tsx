@@ -1,35 +1,24 @@
-import {Offcanvas } from "bootstrap";
 import { useEffect } from "react";
-import {useLocation, useNavigate} from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom";
 
-function MenuBar(){
-    const location = useLocation();
-    const navigate = useNavigate();
-    useEffect(() => {
-      const offcanvasElement = document.getElementById("offcanvasMenu");
-      if (offcanvasElement) {
-        const offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasElement);
-        offcanvasInstance.hide();
-      }
-    }, [location.pathname]); 
-    const handleNav = (path:string) => {
-      const offcanvasElement = document.getElementById("offcanvasMenu");
-      if (offcanvasElement) {
-        const offcanvasInstance = Offcanvas.getInstance(offcanvasElement) || new Offcanvas(offcanvasElement);
-        offcanvasInstance.hide();
-      }
+function MenuBar() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-     if (path === location.pathname) {
-        const backdrop = document.querySelector(".offcanvas-backdrop");
-        if (backdrop) backdrop.remove();
+  const handleNav = (path: string) => {
+    // No need to manually hide the offcanvas
+    if (path === location.pathname) {
+      const backdrop = document.querySelector(".offcanvas-backdrop");
+      if (backdrop) backdrop.remove();
     }
 
-      navigate(path); 
-    };
-    return(
+    navigate(path);
+  };
+
+  return (
     <>
       <button
-        className="playlist-btn w-100" 
+        className="playlist-btn w-100"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasMenu"
@@ -45,7 +34,7 @@ function MenuBar(){
         aria-labelledby="offcanvasMenuLabel"
       >
         <div className="offcanvas-header">
-          <h5 className="offcanvas-title" id="offcanvasMenuLabel">
+          <h5 className="offcanvas-title primary-text" id="offcanvasMenuLabel">
             Menu
           </h5>
           <button
@@ -57,26 +46,32 @@ function MenuBar(){
         </div>
         <div className="offcanvas-body">
           <ul className="nav flex-column">
-          <li className="nav-item">
+            <li className="nav-item">
               <button
-                className="btn btn-link nav-link active"
+                className="btn btn-link nav-link active secondary-text"
+                style={{ fontSize: "20px" }}
                 onClick={() => handleNav("/")}
+                data-bs-dismiss="offcanvas"
               >
                 Home
               </button>
             </li>
             <li className="nav-item">
               <button
-                className="btn btn-link nav-link active"
+                className="btn btn-link nav-link active secondary-text"
+                style={{ fontSize: "20px" }}
                 onClick={() => handleNav("/dashboard")}
+                data-bs-dismiss="offcanvas"
               >
                 Dashboard
               </button>
             </li>
             <li className="nav-item">
               <button
-                className="btn btn-link nav-link active"
+                className="btn btn-link nav-link active secondary-text"
+                style={{ fontSize: "20px" }}
                 onClick={() => handleNav("/settings")}
+                data-bs-dismiss="offcanvas"
               >
                 Settings
               </button>
@@ -84,8 +79,8 @@ function MenuBar(){
           </ul>
         </div>
       </div>
-        </>
-    );
+    </>
+  );
 }
 
 export default MenuBar;

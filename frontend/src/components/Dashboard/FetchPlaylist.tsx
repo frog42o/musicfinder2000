@@ -3,7 +3,6 @@ import React , {useState, useEffect} from 'react';
 import { useAuth } from '../../utils/Authorization';
 import axios from 'axios';
 import { UserDataProps } from '../../types';
-import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import MenuBar from '../HomeComponents/MenuBar';
 import SpotifyLogout from './SpotifyLogout';
@@ -48,8 +47,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
     }, [accessToken, data.id]);
     const handleAnalyze = () =>{
         if(selectedPlaylist){
-            const playlistData =  playlists.find((p) => p.id === selectedPlaylist);
-            navigate('/analyze', { state: { playlist: playlistData } }); 
+            navigate(`/analyze/${selectedPlaylist}`); 
         }else{
             alert("Please select a playlist to analyze.");
         }
@@ -91,12 +89,22 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                     width:"600px",
                     scrollBehavior: "smooth",
                 }}>
+                <p className="m-0 p-0 secondary-text" style={{
+                        position: "absolute",
+                        top: 10,
+                        left: 20,
+                        zIndex: 10,
+                        margin: 0,
+                        padding: "1rem",
+                        backgroundColor: "rgba(0,0,0,0)",
+                        letterSpacing:"2px"
+                }}>{selectedPlaylistIndex +1} / {playlists.length} playlists</p>
                 {playlists.length > 0 && (
                 <div className={`d-block mt-2 rounded-3 mb-2 playlist-container ${animationDirection ? `slide-${animationDirection}` : ""}`} key={playlists[selectedPlaylistIndex].id}>
-                    <div className="d-flex flex-column justify-content-center text-center">
-                        <div className="mt-3 profile-image ">
+                    <div className="d-flex flex-column justify-content-center align-items-center text-center">
+                        <div className="mt-3 playlist-image">
                             <img className="shadow rounded"src={playlists[selectedPlaylistIndex].images?.[0]?.url || ""} alt={`${playlists[selectedPlaylistIndex].name}'s Cover`}
-                            style={{width:"40%"}}/>
+                            style={{width:"100%"}}/>
                         </div>
                         <div className="playlist-info mt-3">
                         <h6 style={{

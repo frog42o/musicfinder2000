@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const fetchSongByID = async(accessToken:string, id:any)=>{
+export const fetchSongByID = async(accessToken:string|null, id:any)=>{
   try{
     const response = await axios.get(`https://api.spotify.com/v1/tracks/${id}`, {
       headers: {
@@ -13,23 +13,27 @@ export const fetchSongByID = async(accessToken:string, id:any)=>{
     throw err;
   }
 }
-export const addSongToPlaylist = async(accessToken:String, playlistID:string, songUri:string) =>{
-  if(!accessToken) return false;;
+export const addSongToPlaylist = async(accessToken:string|null, playlistID:string, songUri:string) =>{
+  if(!accessToken) return false;
   try{
-    const url = `https://api.spotify.com/v1/playlists/${playlistID}/tracks?uris=${songUri}`;
-    await axios.post(url, {
+    const uris= {
+      uris: [songUri]
+    }
+    const url = `https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
+    const response = await axios.post(url,uris, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
     });
-    return true;
+    return response.data;
   }catch(err){
     console.log(err);
     return false;
   }
 
 }
-export const fetchAPIData = async (url:string, range: number[], accessToken:string,  setProgress: (progress: number) => void) => {
+export const fetchAPIData = async (url:string, range: number[], accessToken:string|null,  setProgress: (progress: number) => void) => {
     const [start, end] = range; 
     const rangeSpan = end - start; 
   
@@ -54,7 +58,7 @@ export const fetchAPIData = async (url:string, range: number[], accessToken:stri
       throw error;
     }
   };
-  export const fetchAudioFeatures = async(accessToken: string, range:number[], ids: string[], setProgress:(progress:number)=> void) =>{
+  export const fetchAudioFeatures = async(accessToken: string|null, range:number[], ids: string[], setProgress:(progress:number)=> void) =>{
     try{
         const data = ids;
         let remainingIDs = data.length;
@@ -82,7 +86,7 @@ export const fetchAPIData = async (url:string, range: number[], accessToken:stri
 }
 export const fetchRecommendations = async (
   data: Record<string, number>,
-  accessToken: string,
+  accessToken: string|null,
   range: number[],
   artists_ids:string[],
   setProgress: (progress: number) => void
@@ -135,9 +139,12 @@ export const fetchRecommendations = async (
 };
 
 export const normalizeAudio = (data: any[]) => {
+
   const normalize = (value: number, min: number, max: number) => (value - min) / (max - min);
 
-  const normalizedData = data.map((track) => ({
+  const normalizedData = data
+  .filter((track) => track !== null && track.id !== null)
+  .map((track) => ({
     id: track.id, 
     danceability: normalize(track.danceability, 0, 1),
     energy: normalize(track.energy, 0, 1),
@@ -153,7 +160,6 @@ export const normalizeAudio = (data: any[]) => {
     duration_ms: normalize(track.duration_ms, 60000, 480000), 
     time_signature: normalize(track.time_signature, 3, 7), 
   }));
-
   return normalizedData;
 };
 
@@ -190,3 +196,4 @@ export const findAverageAudioFeature = (audioData: any[]) => {
 
   return featureAverages;
 };
+
