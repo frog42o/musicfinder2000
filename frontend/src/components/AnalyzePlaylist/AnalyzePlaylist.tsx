@@ -140,6 +140,10 @@ const AnalyzePlaylist: React.FC = () => {
                    <img src={playlist.images?.[0]?.url || ""} alt={`${playlist.name}'s Cover`} />
             </div>
             <div className="playlist-info mt-3 d-flex flex-row justify-content-center p-2 gap-1">
+                <img 
+                src="https://developer.spotify.com/images/guidelines/design/full-logo-framed.svg" 
+                alt="Spotify Logo" 
+                style={{ width: "100px", height: "100px",  position: "absolute",top: -20, left: 160, zIndex: 10,margin: 0, }} />
                 <div className='d-flex flex-column text-start w-50'>
                     {isEditing?<>
                     <div className='d-flex flex-row'>
@@ -244,13 +248,13 @@ const AnalyzePlaylist: React.FC = () => {
         ))}
         </div>
         {isEditing? <>
-            <Button className="playlist-btn w-25 mt-3" onClick={updatePlaylistInfo}>Update</Button>
-            <Button className="playlist-btn w-25 mt-3" onClick = {cancelEditPlaylistInfo} >Back</Button>
+            <button className="playlist-btn w-25 mt-3" onClick={updatePlaylistInfo}>Update</button>
+            <button className="playlist-btn w-25 mt-3" onClick = {cancelEditPlaylistInfo} >Back</button>
         </>: <> 
         <div className={`mt-3 w-100 gap-3 playlist-btn-container tc-w ${isGenerating? "apply-box-shadow-red": "apply-box-shadow-green"}`}>  
             <div className="col align-self-start">
             <OverlayTrigger placement="top"overlay={<Tooltip>Update your playlist information!</Tooltip>}>
-                <Button className="playlist-btn w-100" onClick={editPlaylistInfo} disabled={isGenerating}>Edit Playlist</Button>
+                <button className="playlist-btn w-100" onClick={editPlaylistInfo} disabled={isGenerating}>Edit Playlist</button>
             </OverlayTrigger> 
             </div>
             <div className="col align-self-start ">  
@@ -260,7 +264,7 @@ const AnalyzePlaylist: React.FC = () => {
             </div>
             <div className="col align-self-start">
                 <OverlayTrigger placement="top"overlay={<Tooltip>Return back to Dashboard!</Tooltip>}>     
-                    <Button className='playlist-btn w-100' onClick = {() => navigate(-1)} disabled={isGenerating}>Back</Button>
+                    <button className='playlist-btn w-100' onClick = {() => navigate(-1)} disabled={isGenerating}>Back</button>
                 </OverlayTrigger>
             </div>
         </div>

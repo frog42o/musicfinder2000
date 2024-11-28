@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../../utils/Authorization';
 import { TrackDetailsProps, Track } from '../../types';
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Error from '../../components/Error';
 import {
   addSongToPlaylist,
@@ -179,8 +179,11 @@ const Generate: React.FC<TrackDetailsProps> = ({ songs, artists_ids, playlistID,
     const midPoint = start + ((end - start) * 1) / 3;
     const endPoint = start + ((end - start) * 2) / 3;
 
+    console.log("Calling cleanHistoricalData...");
     cleanHistoricalData([start, midPoint]);
+    console.log("Calling analyzeHistoricalData...");
     await analyzeHistoricalData([midPoint, endPoint]);
+    console.log("Calling fetchUserPlaylistAudioFeatures...");
     await fetchUserPlaylistAudioFeatures([endPoint, end]);
   };
 
@@ -210,22 +213,33 @@ const Generate: React.FC<TrackDetailsProps> = ({ songs, artists_ids, playlistID,
 
   // Analyze historical data
   const analyzeHistoricalData = async (range: number[]) => {
+    if(!accessToken)return;
     const [start, end] = range;
     simulateProgress(start, end);
 
-    const extractHistoricalDataIds = cleanedData.map((item) => item.track.id);
-    const audioFeatures = await fetchAudioFeatures(
-      accessToken,
-      range,
-      extractHistoricalDataIds,
-      setGenerateProgress
-    );
-
-    cleanedDataAudioFeatures = normalizeAudio(audioFeatures);
+    const extractHistoricalDataIds = cleanedData
+    .map((item) => item.track?.id) 
+    .filter((id) => id !== null && id !== undefined); 
+    if (extractHistoricalDataIds.length === 0) {
+      console.error("No valid track IDs available after filtering.");
+      return;
+    }
+    try{
+      const audioFeatures = await fetchAudioFeatures(accessToken,range,extractHistoricalDataIds, setGenerateProgress);
+      cleanedDataAudioFeatures = normalizeAudio(audioFeatures);
+    }catch(err){
+      console.log(err);
+      throw err;
+    }
   };
 
   // Fetch user's playlist audio features
   const fetchUserPlaylistAudioFeatures = async (range: number[]) => {
+    if (!accessToken) {
+      console.error("Access token is missing in fetchUserPlaylistAudioFeatures");
+      return;
+    }
+    console.log(`Access token in fetchUserPlaylistAudioFeatures: ${accessToken}`);
     const [start, end] = range;
     simulateProgress(start, end);
 
@@ -256,10 +270,7 @@ const Generate: React.FC<TrackDetailsProps> = ({ songs, artists_ids, playlistID,
       setGenerateProgress
     );
 
-    const model = await kMeansAlgorithm(
-      cleanedDataAudioFeatures,
-      userPlaylistAudioFeatures
-    );
+    const model = await kMeansAlgorithm(cleanedDataAudioFeatures);
 
     const userPlaylistCluster = assignTracksToClusters(
       userPlaylistAudioFeatures,
@@ -384,13 +395,13 @@ const Generate: React.FC<TrackDetailsProps> = ({ songs, artists_ids, playlistID,
           </Tooltip>
         }
       >
-        <Button
+        <button
           className="playlist-btn w-100"
           onClick={handleGenerationProcess}
           disabled={isGenerating} 
         >
           {isGenerating ? 'Generating...' : 'Generate'}
-        </Button>
+        </button>
       </OverlayTrigger>
 
       {finishedGenerating && (
@@ -407,10 +418,14 @@ const Generate: React.FC<TrackDetailsProps> = ({ songs, artists_ids, playlistID,
                 <h1 className="modal-title fs-5" id="staticBackdropLabel">
                   musicfinder2000 found an epic song!
                 </h1>
+               
                 <button type="button" className="btn-close" aria-label="Close" onClick={handleHide}></button>
               </div>
               <div className="modal-body">
-
+              <img 
+                src="https://developer.spotify.com/images/guidelines/design/full-logo-framed.svg" 
+                alt="Spotify Logo" 
+                style={{ width: "100px", height: "100px",  position: "absolute",top: -30, left: 0, zIndex: 10,margin: 0, }} />
                 {songData && (
                   <div className="bg-secondary-subtle border border-dark d-flex align-items-center justify-content-start mb-1">
                     <div className="p-2">

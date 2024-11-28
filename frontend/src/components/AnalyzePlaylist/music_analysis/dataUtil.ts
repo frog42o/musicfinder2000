@@ -41,6 +41,7 @@ export const fetchAPIData = async (url:string, range: number[], accessToken:stri
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
         onDownloadProgress: (progressEvent) => {
           const total = progressEvent.total || 1;
@@ -53,8 +54,8 @@ export const fetchAPIData = async (url:string, range: number[], accessToken:stri
       });
   
       return response.data; 
-    } catch (error) {
-      console.error(`Error fetching data from ${url}:`, error);
+    } catch (error:any) {
+      console.error("Error Response:", error.response?.data || error.message);
       throw error;
     }
   };
@@ -63,11 +64,10 @@ export const fetchAPIData = async (url:string, range: number[], accessToken:stri
         const data = ids;
         let remainingIDs = data.length;
         const result:any[] = [];
-
         while (remainingIDs > 0) {
             const currentBatchSize = Math.min(remainingIDs, 50);
             const currentBatch = data.splice(0, currentBatchSize); 
-            const FETCH_AUDIO_FEATURES_URL =`https://api.spotify.com/v1/audio-features?ids=${currentBatch}`;
+            const FETCH_AUDIO_FEATURES_URL =`https://api.spotify.com/v1/audio-features?ids=${currentBatch.join(',')}`;
             try {
                const response = await fetchAPIData(FETCH_AUDIO_FEATURES_URL, range, accessToken, setProgress);
                result.push(...response.audio_features);

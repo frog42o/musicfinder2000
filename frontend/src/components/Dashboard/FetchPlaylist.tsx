@@ -32,7 +32,7 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
-                const userPlaylists = response.data.items.filter((playlist: any) => playlist.owner.id === data.id);
+                const userPlaylists = response.data.items.filter((playlist: any) => playlist && playlist.owner && playlist.owner.id === data.id);
                 setPlaylists(userPlaylists); //store data within playlists
                 setSelectedPlaylist(userPlaylists[0].id); 
                 setLoading(false);
@@ -89,15 +89,20 @@ const FetchPlaylist: React.FC<UserDataProps> = ({ data }) =>{
                     width:"600px",
                     scrollBehavior: "smooth",
                 }}>
+                <img 
+                src="https://developer.spotify.com/images/guidelines/design/full-logo-framed.svg" 
+                alt="Spotify Logo" 
+                style={{ width: "100px", height: "100px",  position: "absolute",top: -30, left: -10, zIndex: 10,margin: 0, }} />
                 <p className="m-0 p-0 secondary-text" style={{
                         position: "absolute",
                         top: 10,
-                        left: 20,
+                        right: 20,
                         zIndex: 10,
                         margin: 0,
                         padding: "1rem",
                         backgroundColor: "rgba(0,0,0,0)",
-                        letterSpacing:"2px"
+                        letterSpacing:"2px",
+                        opacity:1
                 }}>{selectedPlaylistIndex +1} / {playlists.length} playlists</p>
                 {playlists.length > 0 && (
                 <div className={`d-block mt-2 rounded-3 mb-2 playlist-container ${animationDirection ? `slide-${animationDirection}` : ""}`} key={playlists[selectedPlaylistIndex].id}>

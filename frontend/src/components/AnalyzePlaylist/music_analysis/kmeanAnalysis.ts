@@ -16,7 +16,7 @@ const extractFeatures = (track: any): number[] => [
   track.time_signature,
 ];
 
-export const kMeansAlgorithm = async(data:any[], userPlaylistData:any[])=>{
+export const kMeansAlgorithm = async(data:any[])=>{
       const features = data.map(extractFeatures);
       const optimalK = await runElbowMethod(features);
       //console.log("Optimal K:", optimalK);
