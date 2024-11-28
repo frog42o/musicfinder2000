@@ -12,7 +12,6 @@ export const getSpotifyAuthUrl = (): string => {
         "playlist-read-private",
         "playlist-modify-private",
         "playlist-modify-public",
-        "playlist-modify-private",
         "user-read-recently-played",
         "user-top-read"
     ].join(" ");
